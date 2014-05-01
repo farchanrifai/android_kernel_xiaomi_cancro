@@ -700,6 +700,7 @@ int mdss_mdp_cmd_stop(struct mdss_mdp_ctl *ctl)
 	int ret = 0;
 	int hz;
 	int i = 0, rc = 0;
+	int turn_off_panel = 0;
 
 	ctx = (struct mdss_mdp_cmd_ctx *) ctl->priv_data;
 	if (!ctx) {
@@ -754,6 +755,7 @@ int mdss_mdp_cmd_stop(struct mdss_mdp_ctl *ctl)
 			MDSS_EVENT_REGISTER_RECOVERY_HANDLER,
 			NULL);
 
+	turn_off_panel = ctx->panel_on;
 	ctx->panel_on = 0;
 	mdss_mdp_cmd_clk_off(ctx);
 
@@ -768,11 +770,13 @@ int mdss_mdp_cmd_stop(struct mdss_mdp_ctl *ctl)
 	memset(ctx, 0, sizeof(*ctx));
 	ctl->priv_data = NULL;
 
-	ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_BLANK, NULL);
-	WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
+	if (turn_off_panel) {
+		ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_BLANK, NULL);
+		WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
 
-	ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_PANEL_OFF, NULL);
-	WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
+		ret = mdss_mdp_ctl_intf_event(ctl, MDSS_EVENT_PANEL_OFF, NULL);
+		WARN(ret, "intf %d unblank error (%d)\n", ctl->intf_num, ret);
+	}
 
 	ctl->stop_fnc = NULL;
 	ctl->display_fnc = NULL;

@@ -31,6 +31,7 @@ void mdss_check_dsi_ctrl_status(struct work_struct *work, uint32_t interval)
 {
 	struct dsi_status_data *pstatus_data = NULL;
 	struct mdss_panel_data *pdata = NULL;
+	struct mipi_panel_info *mipi = NULL;
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
 	struct mdss_overlay_private *mdp5_data = NULL;
 	struct mdss_mdp_ctl *ctl = NULL;
@@ -48,6 +49,7 @@ void mdss_check_dsi_ctrl_status(struct work_struct *work, uint32_t interval)
 		pr_err("%s: Panel data not available\n", __func__);
 		return;
 	}
+	mipi = &pdata->panel_info.mipi;
 
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 							panel_data);

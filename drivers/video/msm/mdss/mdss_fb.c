@@ -847,6 +847,7 @@ void mdss_fb_update_backlight(struct msm_fb_data_type *mfd)
 			mutex_unlock(&mfd->bl_lock);
 			mfd->bl_updated = 1;
 		}
+		mutex_unlock(&mfd->bl_lock);
 	}
 }
 
@@ -1389,7 +1390,7 @@ static int mdss_fb_release_all(struct fb_info *info, bool release_all)
 {
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
 	struct mdss_fb_proc_info *pinfo = NULL, *temp_pinfo = NULL;
-	int ret = 0;
+	int ret = 0, ad_ret = 0;
 	int pid = current->tgid;
 	bool unknown_pid = true, release_needed = false;
 	struct task_struct *task = current->group_leader;

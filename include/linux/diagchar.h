@@ -142,7 +142,7 @@ the appropriate macros. */
 #define MSG_SSID_9			5500
 #define MSG_SSID_9_LAST			5516
 #define MSG_SSID_10			6000
-#define MSG_SSID_10_LAST		6080
+#define MSG_SSID_10_LAST		6081
 #define MSG_SSID_11			6500
 #define MSG_SSID_11_LAST		6521
 #define MSG_SSID_12			7000
@@ -154,11 +154,11 @@ the appropriate macros. */
 #define MSG_SSID_15			8000
 #define MSG_SSID_15_LAST		8000
 #define MSG_SSID_16			8500
-#define MSG_SSID_16_LAST		8524
+#define MSG_SSID_16_LAST		8529
 #define MSG_SSID_17			9000
 #define MSG_SSID_17_LAST		9008
 #define MSG_SSID_18			9500
-#define MSG_SSID_18_LAST		9509
+#define MSG_SSID_18_LAST		9510
 #define MSG_SSID_19			10200
 #define MSG_SSID_19_LAST		10210
 #define MSG_SSID_20			10251
@@ -184,7 +184,6 @@ static const uint32_t msg_bld_masks_0[] = {
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_MED,
-	MSG_LVL_MED,
 	MSG_LVL_HIGH,
 	MSG_LVL_ERROR,
 	MSG_LVL_LOW,
@@ -195,7 +194,7 @@ static const uint32_t msg_bld_masks_0[] = {
 	MSG_LVL_MED,
 	MSG_LVL_HIGH,
 	MSG_LVL_HIGH,
-	MSG_LVL_LOW,
+	MSG_LVL_LOW|MSG_MASK_5|MSG_MASK_6|MSG_MASK_7|MSG_MASK_8,
 	MSG_LVL_LOW,
 	MSG_LVL_ERROR,
 	MSG_LVL_LOW,
@@ -367,13 +366,13 @@ static const uint32_t msg_bld_masks_5[] = {
 };
 
 static const uint32_t msg_bld_masks_6[] = {
-	MSG_LVL_MED,
-	MSG_LVL_MED,
-	MSG_LVL_MED,
-	MSG_LVL_MED,
-	MSG_LVL_MED,
-	MSG_LVL_MED,
-	MSG_LVL_MED,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
+	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
@@ -555,7 +554,8 @@ static const uint32_t msg_bld_masks_10[] =  {
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
-	MSG_LVL_LOW
+	MSG_LVL_LOW,
+	MSG_LVL_MED
 };
 
 static const uint32_t msg_bld_masks_11[] = {
@@ -640,6 +640,11 @@ static const uint32_t msg_bld_masks_16[] = {
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
+	MSG_LVL_LOW|MSG_LVL_MED|MSG_LVL_HIGH|MSG_LVL_ERROR|MSG_LVL_FATAL,
+	MSG_LVL_LOW|MSG_LVL_MED|MSG_LVL_HIGH|MSG_LVL_ERROR|MSG_LVL_FATAL,
+	MSG_LVL_LOW|MSG_LVL_MED|MSG_LVL_HIGH|MSG_LVL_ERROR|MSG_LVL_FATAL,
+	MSG_LVL_LOW|MSG_LVL_MED|MSG_LVL_HIGH|MSG_LVL_ERROR|MSG_LVL_FATAL,
+	MSG_LVL_LOW|MSG_LVL_MED|MSG_LVL_HIGH|MSG_LVL_ERROR|MSG_LVL_FATAL
 };
 
 static const uint32_t msg_bld_masks_17[] =  {
@@ -674,6 +679,7 @@ static const uint32_t msg_bld_masks_18[] = {
 	MSG_LVL_LOW,
 	MSG_LVL_LOW | MSG_MASK_5 | \
 		MSG_MASK_6 | MSG_MASK_7 | MSG_MASK_8 | MSG_MASK_9,
+	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW,
 	MSG_LVL_LOW
@@ -751,7 +757,7 @@ static const uint32_t log_code_last_tbl[] = {
 	0xA38A,	/* EQUIP ID 10 */
 	0xB201,	/* EQUIP ID 11 */
 	0x0,	/* EQUIP ID 12 */
-	0x0,	/* EQUIP ID 13 */
+	0xD1FF,	/* EQUIP ID 13 */
 	0x0,	/* EQUIP ID 14 */
 	0x0,	/* EQUIP ID 15 */
 };

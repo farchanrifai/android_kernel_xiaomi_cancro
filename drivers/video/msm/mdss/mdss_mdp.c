@@ -49,6 +49,7 @@
 #include <mach/memory.h>
 #include <mach/msm_memtypes.h>
 #include <mach/rpm-regulator-smd.h>
+#include <mach/scm.h>
 
 #include "mdss.h"
 #include "mdss_fb.h"
@@ -77,6 +78,8 @@ struct msm_mdp_interface mdp5 = {
 
 #define IB_QUOTA 800000000
 #define AB_QUOTA 800000000
+
+#define MEM_PROTECT_SD_CTRL 0xF
 
 static DEFINE_SPINLOCK(mdp_lock);
 static DEFINE_MUTEX(mdp_clk_lock);
@@ -1200,6 +1203,7 @@ static int mdss_mdp_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, mdata);
 	mdss_res = mdata;
 	mutex_init(&mdata->reg_lock);
+	atomic_set(&mdata->sd_client_count, 0);
 
 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mdp_phys");
 	if (!res) {

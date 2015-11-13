@@ -4329,6 +4329,8 @@ static void pp_ad_vsync_handler(struct mdss_mdp_ctl *ctl, ktime_t t)
 
 	if (ctl->mixer_left && ctl->mixer_left->num < mdata->nad_cfgs) {
 		ad = &mdata->ad_cfgs[ctl->mixer_left->num];
+		if (!ad || !ad->mfd || !mdata->ad_calc_wq)
+			return;
 		queue_work(mdata->ad_calc_wq, &ad->calc_work);
 	}
 }
@@ -4573,6 +4575,7 @@ static void pp_ad_calc_worker(struct work_struct *work)
 	base = mdata->ad_off[ad->calc_hw_num].base;
 
 	if ((ad->cfg.mode == MDSS_AD_MODE_AUTO_STR) && (ad->last_bl == 0)) {
+		complete(&ad->comp);
 		mutex_unlock(&ad->lock);
 		return;
 	}

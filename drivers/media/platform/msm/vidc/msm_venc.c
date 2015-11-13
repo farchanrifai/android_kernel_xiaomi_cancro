@@ -842,6 +842,7 @@ static struct msm_vidc_format venc_formats[] = {
 		.get_frame_size = get_frame_size_nv21,
 		.type = OUTPUT_PORT,
 	},
+
 };
 
 static int msm_venc_queue_setup(struct vb2_queue *q,
@@ -2111,6 +2112,14 @@ static int try_set_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 		}
 		pdata = &hier_p_layers;
 		break;
+	case V4L2_CID_MPEG_VIDC_VIDEO_PRIORITY:
+		property_id = HAL_CONFIG_REALTIME;
+		enable.enable = ctrl->val;
+		pdata = &enable;
+		break;
+	case V4L2_CID_MPEG_VIDC_VIDEO_OPERATING_RATE:
+		property_id = 0;
+		break;
 	default:
 		dprintk(VIDC_ERR, "Unsupported index: %x\n", ctrl->id);
 		rc = -ENOTSUPP;
@@ -2558,6 +2567,7 @@ int msm_venc_s_fmt(struct msm_vidc_inst *inst, struct v4l2_format *f)
 			rc = msm_comm_try_state(inst, MSM_VIDC_OPEN_DONE);
 			if (rc) {
 				dprintk(VIDC_ERR, "Failed to open instance\n");
+                                msm_comm_session_clean(inst);
 				goto exit;
 			}
 			frame_sz.width = inst->prop.width[CAPTURE_PORT];

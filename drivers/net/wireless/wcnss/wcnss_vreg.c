@@ -158,6 +158,9 @@ static int configure_iris_xo(struct device *dev, bool use_48mhz_xo, int on,
 	void __iomem *iris_read_reg;
 	struct clk *clk;
 	struct clk *clk_rf = NULL;
+        struct wcnss_wlan_config *cfg = NULL;
+
+        cfg = wcnss_get_wlan_config();
 
 	if (wcnss_hardware_type() == WCNSS_PRONTO_HW) {
 		wcnss_phys_addr = MSM_PRONTO_PHYS;
@@ -246,6 +249,9 @@ static int configure_iris_xo(struct device *dev, bool use_48mhz_xo, int on,
 			auto_detect = WCNSS_XO_48MHZ;
 		else
 			auto_detect = WCNSS_XO_INVALID;
+
+                if (cfg != NULL)
+		    cfg->iris_id = iris_reg;
 
 		/* Clear XO_MODE[b2:b1] bits. Clear implies 19.2 MHz TCXO */
 		reg &= ~(WCNSS_PMU_CFG_IRIS_XO_MODE);

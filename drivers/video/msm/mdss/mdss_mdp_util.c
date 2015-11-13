@@ -579,6 +579,7 @@ int mdss_mdp_get_img(struct msmfb_data *img, struct mdss_mdp_img_data *data)
 			if (ret && (domain == MDSS_IOMMU_DOMAIN_SECURE))
 				msm_ion_unsecure_buffer(iclient,
 						data->srcp_ihdl);
+			data->mapped = true;
 		} else {
 			ret = ion_phys(iclient, data->srcp_ihdl, start,
 				       (size_t *) len);

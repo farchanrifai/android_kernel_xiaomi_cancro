@@ -44,13 +44,7 @@
 #define PP_CLK_CFG_OFF 0
 #define PP_CLK_CFG_ON 1
 
-#define MEM_PROTECT_SD_CTRL 0xF
-
 #define OVERLAY_MAX 10
-
-struct sd_ctrl_req {
-	unsigned int enable;
-} __attribute__ ((__packed__));
 
 static atomic_t ov_active_panels = ATOMIC_INIT(0);
 static int mdss_mdp_overlay_free_fb_pipe(struct msm_fb_data_type *mfd);
@@ -912,6 +906,7 @@ static void mdss_mdp_overlay_cleanup(struct msm_fb_data_type *mfd)
 	list_for_each_entry_safe(pipe, tmp, &destroy_pipes, cleanup_list) {
 		__mdss_mdp_overlay_free_list_add(mfd, &pipe->front_buf);
 		mdss_mdp_overlay_free_buf(&pipe->back_buf);
+		list_del_init(&pipe->list);
 		mdss_mdp_pipe_destroy(pipe);
 	}
 	mutex_unlock(&mfd->lock);
@@ -1057,7 +1052,7 @@ static int __overlay_queue_pipes(struct msm_fb_data_type *mfd)
 		 * When secure display is enabled, if there is a non secure
 		 * display pipe, skip that
 		 */
-		if ((mdp5_data->sd_enabled) &&
+		if (mdss_get_sd_client_cnt() &&
 			!(pipe->flags & MDP_SECURE_DISPLAY_OVERLAY_SESSION)) {
 			pr_warn("Non secure pipe during secure display: %u: %08X, skip\n",
 					pipe->num, pipe->flags);
@@ -1159,8 +1154,13 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 	 * secure display session
 	 */
 	if (!sd_in_pipe && mdp5_data->sd_enabled) {
-		if (0 == mdss_mdp_overlay_sd_ctrl(mfd, 0))
+		/* disable the secure display on last client */
+		if (mdss_get_sd_client_cnt() == 1)
+			ret = mdss_mdp_secure_display_ctrl(0);
+		if (!ret) {
+			mdss_update_sd_client(mdp5_data->mdata, false);
 			mdp5_data->sd_enabled = 0;
+		}
 	}
 
 	mdss_mdp_ctl_notify(ctl, MDP_NOTIFY_FRAME_BEGIN);
@@ -1207,6 +1207,8 @@ int mdss_mdp_overlay_kickoff(struct msm_fb_data_type *mfd,
 			ret = mdss_mdp_overlay_sd_ctrl(mfd, 1);
 			if (ret == 0)
 				mdp5_data->sd_enabled = 1;
+				mdss_update_sd_client(mdp5_data->mdata, true);
+			}
 		}
 		mutex_unlock(&mfd->lock);
 	}
@@ -1222,7 +1224,8 @@ commit_fail:
 		wake_up_all(&mfd->kickoff_wait_q);
 	}
 	mutex_unlock(&mdp5_data->ov_lock);
-	if (ctl->shared_lock)
+	if (ctl->shared_lock) {
+		mutex_unlock(ctl->wb_lock);
 		mutex_unlock(ctl->shared_lock);
 
 	return ret;

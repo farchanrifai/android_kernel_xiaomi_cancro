@@ -1209,7 +1209,6 @@ int dsi_panel_device_register(struct device_node *pan_node,
 	int incell_enabled = 0;
 	struct device_node *dsi_ctrl_np = NULL;
 	struct platform_device *ctrl_pdev = NULL;
-	bool dynamic_fps;
 	const char *data;
 	struct mdss_panel_info *pinfo = &(ctrl_pdata->panel_data.panel_info);
 

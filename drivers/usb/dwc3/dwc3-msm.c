@@ -1366,9 +1366,11 @@ static int dwc3_msm_link_clk_reset(struct dwc3_msm *mdwc, bool assert)
 	if (assert) {
 		/* Using asynchronous block reset to the hardware */
 		dev_dbg(mdwc->dev, "block_reset ASSERT\n");
-		clk_disable_unprepare(mdwc->ref_clk);
-		clk_disable_unprepare(mdwc->iface_clk);
-		clk_disable_unprepare(mdwc->core_clk);
+		if (!atomic_read(&mdwc->in_lpm)) {
+			clk_disable_unprepare(mdwc->ref_clk);
+			clk_disable_unprepare(mdwc->iface_clk);
+			clk_disable_unprepare(mdwc->core_clk);
+		}
 		ret = clk_reset(mdwc->core_clk, CLK_RESET_ASSERT);
 		if (ret)
 			dev_err(mdwc->dev, "dwc3 core_clk assert failed\n");
@@ -1376,9 +1378,11 @@ static int dwc3_msm_link_clk_reset(struct dwc3_msm *mdwc, bool assert)
 		dev_dbg(mdwc->dev, "block_reset DEASSERT\n");
 		ret = clk_reset(mdwc->core_clk, CLK_RESET_DEASSERT);
 		ndelay(200);
-		clk_prepare_enable(mdwc->core_clk);
-		clk_prepare_enable(mdwc->ref_clk);
-		clk_prepare_enable(mdwc->iface_clk);
+		if (!atomic_read(&mdwc->in_lpm)) {
+			clk_prepare_enable(mdwc->core_clk);
+			clk_prepare_enable(mdwc->ref_clk);
+			clk_prepare_enable(mdwc->iface_clk);
+		}
 		if (ret)
 			dev_err(mdwc->dev, "dwc3 core_clk deassert failed\n");
 	}

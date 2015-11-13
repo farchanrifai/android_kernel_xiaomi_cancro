@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -286,50 +286,6 @@ void mdss_dsi_bus_clk_stop(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 	clk_disable_unprepare(ctrl_pdata->mdp_core_clk);
 }
 
-static int mdss_dsi_link_clk_prepare(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
-{
-	int rc = 0;
-
-	rc = clk_prepare(ctrl_pdata->esc_clk);
-	if (rc) {
-		pr_err("%s: Failed to prepare dsi esc clk\n", __func__);
-		goto esc_clk_err;
-	}
-
-	rc = clk_prepare(ctrl_pdata->byte_clk);
-	if (rc) {
-		pr_err("%s: Failed to prepare dsi byte clk\n", __func__);
-		goto byte_clk_err;
-	}
-
-	rc = clk_prepare(ctrl_pdata->pixel_clk);
-	if (rc) {
-		pr_err("%s: Failed to prepare dsi pixel clk\n", __func__);
-		goto pixel_clk_err;
-	}
-
-	return rc;
-
-pixel_clk_err:
-	clk_unprepare(ctrl_pdata->byte_clk);
-byte_clk_err:
-	clk_unprepare(ctrl_pdata->esc_clk);
-esc_clk_err:
-	return rc;
-}
-
-static void mdss_dsi_link_clk_unprepare(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
-{
-	if (!ctrl_pdata) {
-		pr_err("%s: Invalid input data\n", __func__);
-		return;
-	}
-
-	clk_unprepare(ctrl_pdata->pixel_clk);
-	clk_unprepare(ctrl_pdata->byte_clk);
-	clk_unprepare(ctrl_pdata->esc_clk);
-}
-
 static int mdss_dsi_link_clk_set_rate(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	u32 esc_clk_rate = 19200000;
@@ -371,13 +327,15 @@ error:
 	return rc;
 }
 
-static int mdss_dsi_link_clk_enable(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
+static int mdss_dsi_link_clk_start(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	int rc = 0;
 
-	if (!ctrl_pdata) {
-		pr_err("%s: Invalid input data\n", __func__);
-		return -EINVAL;
+	rc = mdss_dsi_link_clk_set_rate(ctrl_pdata);
+	if (rc) {
+		pr_err("%s: failed to set clk rates. rc=%d\n",
+			__func__, rc);
+		goto error;
 	}
 
 	pr_debug("%s: ndx=%d\n", __func__, ctrl_pdata->ndx);
@@ -393,13 +351,13 @@ static int mdss_dsi_link_clk_enable(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 		goto esc_clk_err;
 	}
 
-	rc = clk_enable(ctrl_pdata->byte_clk);
+	rc = clk_prepare_enable(ctrl_pdata->byte_clk);
 	if (rc) {
 		pr_err("%s: Failed to enable dsi byte clk\n", __func__);
 		goto byte_clk_err;
 	}
 
-	rc = clk_enable(ctrl_pdata->pixel_clk);
+	rc = clk_prepare_enable(ctrl_pdata->pixel_clk);
 	if (rc) {
 		pr_err("%s: Failed to enable dsi pixel clk\n", __func__);
 		goto pixel_clk_err;
@@ -410,20 +368,20 @@ static int mdss_dsi_link_clk_enable(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 	return rc;
 
 pixel_clk_err:
-	clk_disable(ctrl_pdata->byte_clk);
+	clk_disable_unprepare(ctrl_pdata->byte_clk);
 byte_clk_err:
-	clk_disable(ctrl_pdata->esc_clk);
+	clk_disable_unprepare(ctrl_pdata->esc_clk);
 esc_clk_err:
+error:
 	return rc;
 }
 
-static void mdss_dsi_link_clk_disable(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
+static void mdss_dsi_link_clk_stop(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 {
 	if (!ctrl_pdata) {
 		pr_err("%s: Invalid input data\n", __func__);
 		return;
 	}
-
 	pr_debug("%s: ndx=%d\n", __func__, ctrl_pdata->ndx);
 
 	if (ctrl_pdata->mdss_dsi_clk_on == 0) {

@@ -5,7 +5,6 @@
  *  HID driver for Logitech Unifying receivers
  *
  *  Copyright (c) 2011 Logitech
- *  Copyright (C) 2015 XiaoMi, Inc.
  */
 
 /*
@@ -28,6 +27,7 @@
 
 #define DJ_MAX_PAIRED_DEVICES			6
 #define DJ_MAX_NUMBER_NOTIFICATIONS		8
+#define DJ_RECEIVER_INDEX			0
 #define DJ_DEVICE_INDEX_MIN 			1
 #define DJ_DEVICE_INDEX_MAX 			6
 
